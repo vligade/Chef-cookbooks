@@ -1,0 +1,8 @@
+name             'fen-nrpe'
+maintainer       'Prashant Sharma'
+maintainer_email 'prashant.sharma@tothenew.com'
+license          'All rights reserved'
+description      'Installs/Configures fen-nrpe'
+long_description 'Installs/Configures fen-nrpe'
+version          '0.1.0'
+depends 'nrpe'

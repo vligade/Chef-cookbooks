@@ -1,0 +1,79 @@
+server {
+	listen 80 default_server;
+#	listen [::]:80 default_server ipv6only=on;
+
+	root /mnt/code/;
+	index index.php index.html index.htm;
+
+	# Make site accessible from http://localhost/
+	server_name localhost;
+
+	location / {
+		# First attempt to serve request as file, then
+		# as directory, then fall back to displaying a 404.
+		try_files $uri $uri/ =404;
+		# Uncomment to enable naxsi on this location
+                #set $http_host "d2au585asp1cy8.cloudfront.net";
+		# include /etc/nginx/naxsi.rules
+                real_ip_header X-Forwarded-For;
+      		set_real_ip_from 10.0.0.0/0;
+ 		real_ip_recursive on;
+
+                if ($http_user_agent ~* (crawler) ) {
+ 			set $elb 'yes';
+			}
+		location ~ .* {
+  		if ($elb = 'yes') {
+    			access_log /var/log/nginx/elb.log;
+    			return 200;
+   			 }
+}
+	}
+        location /nginx_status {
+        # Turn on stats
+        stub_status on;
+        allow 127.0.0.1;
+        allow 52.76.61.79;
+        deny all;
+        }
+	# Only for nginx-naxsi used with nginx-naxsi-ui : process denied requests
+	#location /RequestDenied {
+	#	proxy_pass http://127.0.0.1:8080;    
+	#}
+
+	#error_page 404 /40x.html;
+	#location = /40x.html {		
+	#	root /usr/share/nginx/html;
+	#}
+	# redirect server error pages to the static page /50x.html
+	#
+        # error_page 500 502 503 504 /50x.html;
+        #error_page 503 /50x.html;
+	error_page 503 500 502 504 /50x.html;
+	location = /50x.html {
+		root /usr/share/nginx/html;
+		
+	}
+# pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+	#
+	  location ~ \.php$ {
+		fastcgi_split_path_info ^(.+\.php)(/.+)$;
+		# NOTE: You should have "cgi.fix_pathinfo = 0;" in php.ini
+	
+	#	# With php5-cgi alone:
+	#	fastcgi_pass 127.0.0.1:9000;
+		# With php5-fpm:
+		fastcgi_pass unix:/var/run/php5-fpm.sock;
+		fastcgi_index index.php;
+		include fastcgi_params;
+	}
+
+	# deny access to .htaccess files, if Apache's document root
+	# concurs with nginx's one
+	#
+	#location ~ /\.ht {
+	#	deny all;
+	#}
+}
+
+
